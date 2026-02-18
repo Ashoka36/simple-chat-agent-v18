@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Chat Agent</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f2f5; }
+        #chat-container { width: 450px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #1c1e21; text-align: center; margin-top: 0; }
+        #messages { height: 350px; overflow-y: auto; border: 1px solid #e4e6eb; padding: 15px; margin-bottom: 15px; border-radius: 8px; background: #fafafa; }
+        .msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 18px; max-width: 80%; line-height: 1.4; }
+        .user { background: #0084ff; color: white; align-self: flex-end; margin-left: auto; text-align: right; }
+        .bot { background: #e4e6eb; color: #1c1e21; align-self: flex-start; }
+        input { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 20px; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #0084ff; }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h2>Chat Agent v18</h2>
+        <div id="messages"></div>
+        <input type="text" id="user-input" placeholder="Type a message and press Enter..." onkeypress="if(event.key === 'Enter') sendMessage()">
+    </div>
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            appendMessage('user', message);
+            input.value = '';
+            
+            fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                setTimeout(() => appendMessage('bot', data.response), 500);
+            })
+            .catch(err => appendMessage('bot', 'Error connecting to agent.'));
+        }
+        
+        function appendMessage(sender, text) {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = 'msg ' + sender;
+            div.innerText = text;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+    </script>
+</body>
+</html>
